@@ -1,0 +1,44 @@
+{
+  "name": "apptweak-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AppTweak API — exposes all 48 AppTweak tools for LLM clients",
+  "main": "./dist/index.js",
+  "bin": {
+    "apptweak-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "apptweak", "aso", "app-store", "google-play"],
+  "author": "",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "axios": "^1.7.9",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.7",
+    "axios-mock-adapter": "^2.1.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.ts"]
+  }
+}
