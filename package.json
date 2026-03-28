@@ -1,5 +1,5 @@
 {
-  "name": "apptweak-mcp",
+  "name": "@ckz-2055/apptweak-mcp",
   "version": "1.0.0",
   "description": "MCP server for AppTweak API — exposes all 48 AppTweak tools for LLM clients",
   "main": "./dist/index.js",
