@@ -3,7 +3,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import express from "express";
+import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import express, { Request, Response, NextFunction } from "express";
 import { createClient } from "./client.js";
 import { registerTools as registerAppTools } from "./tools/app.js";
 import { registerTools as registerKeywordTools } from "./tools/keywords.js";
@@ -12,11 +13,9 @@ import { registerTools as registerConsoleTools } from "./tools/console.js";
 import { registerTools as registerUtilityTools } from "./tools/utility.js";
 
 function parseApiKey(): string | undefined {
-  // Check env var first (for HTTP mode)
   if (process.env.APPTWEAK_API_KEY) {
     return process.env.APPTWEAK_API_KEY;
   }
-  // Fall back to CLI arg (for stdio mode)
   const args = process.argv.slice(2);
   const idx = args.indexOf("--api-key");
   if (idx !== -1 && args[idx + 1]) {
@@ -25,10 +24,7 @@ function parseApiKey(): string | undefined {
   return undefined;
 }
 
-async function main() {
-  const apiKey = parseApiKey();
-  const client = createClient(apiKey);
-
+function createServerWithClient(client: ReturnType<typeof createClient>): McpServer {
   const server = new McpServer({
     name: "apptweak-mcp",
     version: "1.0.1",
@@ -40,45 +36,92 @@ async function main() {
   registerConsoleTools(server, client);
   registerUtilityTools(server, client);
 
-  // Determine mode based on environment variable
+  return server;
+}
+
+async function main() {
+  const apiKey = parseApiKey();
+
   if (process.env.HTTP_MODE === "true") {
-    // Remote mode - Streamable HTTP with Express
-    await startHttpServer(server);
+    await startHttpServer();
   } else {
-    // Local mode - stdio
+    if (!apiKey) {
+      console.error("API key required. Set APPTWEAK_API_KEY env var or pass --api-key argument.");
+      process.exit(1);
+    }
+    const client = createClient(apiKey);
+    const server = createServerWithClient(client);
     const transport = new StdioServerTransport();
     await server.connect(transport);
   }
 }
 
-async function startHttpServer(server: McpServer) {
+// Store transports by session ID
+const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+
+async function startHttpServer() {
   const app = express();
-  app.use(express.json());
 
-  const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
-
-  app.post("/mcp", async (req, res) => {
-    const sessionId = (req.headers["mcp-session-id"] as string) ||
-                       crypto.randomUUID();
-
-    let transport = transports[sessionId];
-    if (!transport) {
-      transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: () => sessionId,
-      });
-      transports[sessionId] = transport;
-
-      transport.onclose = () => {
-        delete transports[sessionId];
-      };
-
-      await server.connect(transport);
-    }
-
-    transport.handleRequest(req, res, req.body);
+  // Error handler
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error("Express error:", err);
+    res.status(500).json({ error: err.message });
   });
 
-  // Health check endpoint
+  app.use(express.json({ strict: true }));
+
+  app.post("/mcp", async (req: Request, res: Response) => {
+    const sessionId = req.headers["mcp-session-id"] as string | undefined;
+    const apiKey = req.headers["x-apptweak-key"] as string | undefined;
+
+    // Require x-apptweak-key header
+    if (!apiKey) {
+      res.status(401).json({
+        error: "Unauthorized",
+        message: "Missing x-apptweak-key header. Please provide your AppTweak API key."
+      });
+      return;
+    }
+
+    let client;
+    try {
+      client = createClient(apiKey);
+    } catch {
+      res.status(401).json({
+        error: "Unauthorized",
+        message: "Invalid API key."
+      });
+      return;
+    }
+
+    if (sessionId && transports[sessionId]) {
+      // Existing session - reuse transport
+      await transports[sessionId].handleRequest(req, res, req.body);
+    } else if (!sessionId && isInitializeRequest(req.body)) {
+      // New session
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => crypto.randomUUID(),
+        onsessioninitialized: (sid) => {
+          transports[sid] = transport;
+        }
+      });
+
+      transport.onclose = () => {
+        const sid = transport.sessionId;
+        if (sid) delete transports[sid];
+      };
+
+      const server = createServerWithClient(client);
+      await server.connect(transport);
+      await transport.handleRequest(req, res, req.body);
+    } else {
+      res.status(400).json({
+        error: "Bad Request",
+        message: "Invalid session or request."
+      });
+    }
+  });
+
   app.get("/health", (req, res) => {
     res.json({ status: "ok", service: "apptweak-mcp" });
   });
@@ -86,7 +129,7 @@ async function startHttpServer(server: McpServer) {
   const PORT = parseInt(process.env.PORT || "3000", 10);
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`AppTweak MCP server running on port ${PORT}`);
-    console.log(`Endpoint: http://0.0.0.0:${PORT}/mcp`);
+    console.log(`Auth: Requires x-apptweak-key header`);
   });
 }
 
