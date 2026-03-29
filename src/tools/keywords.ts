@@ -39,12 +39,18 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_keyword_metrics_current",
     "Returns current metrics for a keyword: search volume, difficulty score, brand presence, total results, and max reach.",
     {
-      keyword: z.string().describe("The keyword to get metrics for"),
+      keywords: z.string().describe("The keyword(s) to get metrics for"),
+      metrics: z.string().optional().describe("Comma-separated metrics to return: volume, difficulty, brand, total_results, max_reach (default: volume,difficulty)"),
       ...commonKwParams,
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/metrics/current.json", { params });
+        // Default to volume,difficulty if metrics not specified
+        const queryParams = { ...params };
+        if (!queryParams.metrics) {
+          queryParams.metrics = "volume,difficulty";
+        }
+        const { data } = await client.get("/api/public/store/keywords/metrics/current.json", { params: queryParams });
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -54,7 +60,8 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_keyword_metrics_history",
     "Returns historical metrics for a keyword over a date range. Use to track volume and difficulty trends.",
     {
-      keyword: z.string().describe("The keyword to get historical metrics for"),
+      keywords: z.string().describe("The keyword(s) to get historical metrics for"),
+      metrics: z.string().optional().describe("Comma-separated metrics to return: volume, difficulty, brand, total_results, max_reach"),
       ...historyKwParams,
     },
     async (params: any) => {
@@ -99,7 +106,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_keyword_live_search_current",
     "Returns the current live search results for a keyword — which apps appear when users search for this keyword right now.",
     {
-      keyword: z.string().describe("The keyword to search for"),
+      keywords: z.string().describe("The keyword(s) to search for"),
       ...commonKwParams,
     },
     async (params: any) => {
@@ -114,7 +121,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_keyword_live_search_ads_current",
     "Returns current search ads shown for a keyword — which apps are running paid Apple Search Ads for this term.",
     {
-      keyword: z.string().describe("The keyword to check ads for"),
+      keywords: z.string().describe("The keyword(s) to check ads for"),
       ...commonKwParams,
     },
     async (params: any) => {
@@ -129,7 +136,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_keyword_live_search_history",
     "Returns historical search results for a keyword over time — how the SERP for a keyword changed.",
     {
-      keyword: z.string().describe("The keyword to get history for"),
+      keywords: z.string().describe("The keyword(s) to get history for"),
       ...historyKwParams,
     },
     async (params: any) => {

@@ -34,12 +34,17 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "Returns the current top chart apps. Use to see which apps are trending in free, paid, or grossing charts.",
     {
       chart_type: z.string().describe("Chart type: topfreeapplications, toppaidapplications, topgrossingapplications"),
+      types: z.string().optional().describe("Chart segment: free, paid, or grossing (default: free)"),
+      categories: z.string().optional().describe("Category ID or 0 for all categories (default: 0)"),
       ...commonChartParams,
       limit: z.number().optional().describe("Number of results to return"),
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/charts/top-results/current.json", { params });
+        const queryParams = { ...params };
+        if (!queryParams.types) queryParams.types = "free";
+        if (!queryParams.categories) queryParams.categories = "0";
+        const { data } = await client.get("/api/public/store/charts/top-results/current.json", { params: queryParams });
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -50,13 +55,18 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "Returns historical top chart rankings over a date range. Use to analyze chart trends and track when apps entered/exited charts.",
     {
       chart_type: z.string().describe("Chart type: topfreeapplications, toppaidapplications, topgrossingapplications"),
+      types: z.string().optional().describe("Chart segment: free, paid, or grossing (default: free)"),
+      categories: z.string().optional().describe("Category ID or 0 for all categories (default: 0)"),
       ...commonChartParams,
       start_date: z.string().optional().describe("Start date YYYY-MM-DD"),
       end_date: z.string().optional().describe("End date YYYY-MM-DD"),
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/charts/top-results/history", { params });
+        const queryParams = { ...params };
+        if (!queryParams.types) queryParams.types = "free";
+        if (!queryParams.categories) queryParams.categories = "0";
+        const { data } = await client.get("/api/public/store/charts/top-results/history", { params: queryParams });
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }

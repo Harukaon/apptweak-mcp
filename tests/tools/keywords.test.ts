@@ -46,13 +46,13 @@ describe("keyword tools", () => {
 
   it("apptweak_keyword_metrics_current calls correct endpoint", async () => {
     mock.onGet("/api/public/store/keywords/metrics/current.json").reply(200, { result: { volume: 5000 } });
-    const result = await registeredTools["apptweak_keyword_metrics_current"]({ keyword: "fitness" });
+    const result = await registeredTools["apptweak_keyword_metrics_current"]({ keywords: "fitness" });
     expect(result.content[0].text).toContain("volume");
   });
 
   it("apptweak_keyword_live_search_current calls correct endpoint", async () => {
     mock.onGet("/api/public/store/keywords/search-results/current").reply(200, { result: [] });
-    const result = await registeredTools["apptweak_keyword_live_search_current"]({ keyword: "fitness" });
+    const result = await registeredTools["apptweak_keyword_live_search_current"]({ keywords: "fitness" });
     expect(result.content[0].text).toContain("result");
   });
 });

@@ -283,7 +283,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     "apptweak_cpp_by_keyword",
     "Returns CPP breakdown by keyword — shows which Custom Product Pages are shown when searching a keyword.",
     {
-      keyword: z.string().describe("The keyword to analyze CPPs for"),
+      keywords: z.string().describe("The keyword(s) to analyze CPPs for"),
       ...cppBaseParams,
     },
     async (params: any) => {
