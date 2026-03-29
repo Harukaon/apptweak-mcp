@@ -1,10 +1,10 @@
 {
   "name": "@ckz_2055/apptweak-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for AppTweak API — exposes all 48 AppTweak tools for LLM clients",
   "main": "./dist/index.js",
   "bin": {
-    "apptweak-mcp": "./dist/index.js"
+    "@ckz-2055/apptweak-mcp": "./dist/index.js"
   },
   "files": [
     "dist",
