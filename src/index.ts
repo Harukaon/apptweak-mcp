@@ -60,6 +60,13 @@ async function main() {
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
 async function startHttpServer() {
+  const apiKey = parseApiKey();
+  if (!apiKey) {
+    console.error("APPTWEAK_API_KEY environment variable is required for HTTP mode.");
+    process.exit(1);
+  }
+
+  const client = createClient(apiKey);
   const app = express();
 
   // Error handler
@@ -72,27 +79,6 @@ async function startHttpServer() {
 
   app.post("/mcp", async (req: Request, res: Response) => {
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
-    const apiKey = req.headers["x-apptweak-key"] as string | undefined;
-
-    // Require x-apptweak-key header
-    if (!apiKey) {
-      res.status(401).json({
-        error: "Unauthorized",
-        message: "Missing x-apptweak-key header. Please provide your AppTweak API key."
-      });
-      return;
-    }
-
-    let client;
-    try {
-      client = createClient(apiKey);
-    } catch {
-      res.status(401).json({
-        error: "Unauthorized",
-        message: "Invalid API key."
-      });
-      return;
-    }
 
     if (sessionId && transports[sessionId]) {
       // Existing session - reuse transport
@@ -129,7 +115,6 @@ async function startHttpServer() {
   const PORT = parseInt(process.env.PORT || "3000", 10);
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`AppTweak MCP server running on port ${PORT}`);
-    console.log(`Auth: Requires x-apptweak-key header`);
   });
 }
 
