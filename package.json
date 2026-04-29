@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "start:http": "node dist/index.js",
+    "start": "HTTP_MODE=true node dist/index.js",
+    "start:http": "HTTP_MODE=true node dist/index.js",
     "dev": "ts-node src/index.ts",
     "dev:http": "HTTP_MODE=true ts-node src/index.ts",
     "test": "jest",
