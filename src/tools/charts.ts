@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { AxiosInstance, isAxiosError } from "axios";
 import { z } from "zod";
+import { cachedGet } from "../client.js";
 
 function handleError(error: unknown): { content: Array<{ type: "text"; text: string }> } {
   if (isAxiosError(error)) {
@@ -44,7 +45,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
         const queryParams = { ...params };
         if (!queryParams.types) queryParams.types = "free";
         if (!queryParams.categories) queryParams.categories = "0";
-        const { data } = await client.get("/api/public/store/charts/top-results/current.json", { params: queryParams });
+        const data = await cachedGet(client, "/api/public/store/charts/top-results/current.json", queryParams);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -66,7 +67,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
         const queryParams = { ...params };
         if (!queryParams.types) queryParams.types = "free";
         if (!queryParams.categories) queryParams.categories = "0";
-        const { data } = await client.get("/api/public/store/charts/top-results/history", { params: queryParams });
+        const data = await cachedGet(client, "/api/public/store/charts/top-results/history", queryParams);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -82,7 +83,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/charts/dna/current.json", { params });
+        const data = await cachedGet(client, "/api/public/store/charts/dna/current.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -100,7 +101,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/categories/benchmarks", { params });
+        const data = await cachedGet(client, "/api/public/store/categories/benchmarks", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -118,7 +119,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/categories/metrics", { params });
+        const data = await cachedGet(client, "/api/public/store/categories/metrics", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }

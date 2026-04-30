@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { AxiosInstance, isAxiosError } from "axios";
 import { z } from "zod";
+import { cachedGet } from "../client.js";
 
 function handleError(error: unknown): { content: Array<{ type: "text"; text: string }> } {
   if (isAxiosError(error)) {
@@ -30,7 +31,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/apptweak/usage/credits");
+        const data = await cachedGet(client, "/api/public/apptweak/usage/credits");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -42,7 +43,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/apptweak/countries");
+        const data = await cachedGet(client, "/api/public/apptweak/countries");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -54,7 +55,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/apptweak/languages");
+        const data = await cachedGet(client, "/api/public/apptweak/languages");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -66,7 +67,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/apptweak/dnas");
+        const data = await cachedGet(client, "/api/public/apptweak/dnas");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -94,7 +95,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/apptweak/user/tracked_applications");
+        const data = await cachedGet(client, "/api/public/apptweak/user/tracked_applications");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }

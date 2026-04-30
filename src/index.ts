@@ -8,6 +8,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { randomUUID } from "node:crypto";
 import { URL } from "node:url";
 import { createClient } from "./client.js";
+import { initCache } from "./cache.js";
 import { registerTools as registerAppTools } from "./tools/app.js";
 import { registerTools as registerKeywordTools } from "./tools/keywords.js";
 import { registerTools as registerChartTools } from "./tools/charts.js";
@@ -48,6 +49,7 @@ function createServerWithClient(client: ReturnType<typeof createClient>): McpSer
 }
 
 async function main() {
+  initCache(process.env.REDIS_URL);
   const apiKey = parseApiKey();
 
   if (process.env.HTTP_MODE === "true") {
@@ -207,8 +209,10 @@ async function startHttpServer() {
 
   // ── MCP Endpoints ──────────────────────────────────────────────────
 
-  app.get("/health", (_req: Request, res: Response) => {
-    res.json({ status: "ok", service: "apptweak-mcp", oauth: true });
+  app.get("/health", async (_req: Request, res: Response) => {
+    const cache = (await import("./cache.js")).getCache();
+    const stats = await cache.stats();
+    res.json({ status: "ok", service: "apptweak-mcp", oauth: true, cache: stats });
   });
 
   // Streamable HTTP MCP (protected by Bearer auth)

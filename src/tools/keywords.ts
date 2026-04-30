@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { AxiosInstance, isAxiosError } from "axios";
 import { z } from "zod";
+import { cachedGet } from "../client.js";
 
 function handleError(error: unknown): { content: Array<{ type: "text"; text: string }> } {
   if (isAxiosError(error)) {
@@ -50,7 +51,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
         if (!queryParams.metrics) {
           queryParams.metrics = "volume,difficulty";
         }
-        const { data } = await client.get("/api/public/store/keywords/metrics/current.json", { params: queryParams });
+        const data = await cachedGet(client, "/api/public/store/keywords/metrics/current.json", queryParams);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -66,7 +67,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/metrics/history.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/metrics/history.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -81,7 +82,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/apps/keywords-rankings/current.json", { params });
+        const data = await cachedGet(client, "/api/public/store/apps/keywords-rankings/current.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -96,7 +97,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/apps/keywords-rankings/history.json", { params });
+        const data = await cachedGet(client, "/api/public/store/apps/keywords-rankings/history.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -111,7 +112,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/search-results/current", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/search-results/current", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -126,7 +127,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/search-results/ads/current", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/search-results/ads/current", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -141,7 +142,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/search-results/history.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/search-results/history.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -156,7 +157,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/suggestions/app.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/suggestions/app.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -171,7 +172,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/suggestions/category.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/suggestions/category.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -186,7 +187,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/suggestions/trending.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/suggestions/trending.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -201,7 +202,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/apps/keywords/bids.json", { params });
+        const data = await cachedGet(client, "/api/public/store/apps/keywords/bids.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -216,7 +217,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/store/keywords/apps/bids.json", { params });
+        const data = await cachedGet(client, "/api/public/store/keywords/apps/bids.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }

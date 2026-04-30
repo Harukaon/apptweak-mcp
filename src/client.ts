@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { getCache, cacheKey, resolveTtl } from "./cache.js";
 
 export function createClient(apiKey?: string): AxiosInstance {
   const key = apiKey ?? process.env.APPTWEAK_API_KEY;
@@ -13,4 +14,25 @@ export function createClient(apiKey?: string): AxiosInstance {
       "x-apptweak-key": key,
     },
   });
+}
+
+export async function cachedGet<T>(
+  client: AxiosInstance,
+  path: string,
+  params?: Record<string, unknown>,
+): Promise<T> {
+  const ttl = resolveTtl(path);
+  if (ttl === 0) {
+    const { data } = await client.get<T>(path, { params });
+    return data;
+  }
+
+  const key = cacheKey(path, params);
+  const cache = getCache();
+  const hit = await cache.get<T>(key);
+  if (hit !== null) return hit;
+
+  const { data } = await client.get<T>(path, { params });
+  await cache.set(key, data, ttl);
+  return data;
 }

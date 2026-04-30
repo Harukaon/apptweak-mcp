@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "apptweak": {
+      "type": "http",
+      "url": "https://feedmob-apptweak.3.15.29.33.sslip.io/mcp"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { AxiosInstance, isAxiosError } from "axios";
 import { z } from "zod";
+import { cachedGet } from "../client.js";
 
 function handleError(error: unknown): { content: Array<{ type: "text"; text: string }> } {
   if (isAxiosError(error)) {
@@ -40,7 +41,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     {},
     async () => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts");
+        const data = await cachedGet(client, "/api/public/integrations/accounts");
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -54,7 +55,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     },
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/products", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/products", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -66,7 +67,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/ios/reports/devices", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/ios/reports/devices", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -78,7 +79,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/ios/reports/channels", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/ios/reports/channels", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -90,7 +91,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/ios/reports/in_app_events", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/ios/reports/in_app_events", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -102,7 +103,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/android/store-analysis", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/android/store-analysis", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -114,7 +115,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/android/organic-search.json", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/android/organic-search.json", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }
@@ -126,7 +127,7 @@ export function registerTools(server: McpServer, client: AxiosInstance): void {
     consoleBaseParams,
     async (params: any) => {
       try {
-        const { data } = await client.get("/api/public/integrations/accounts/reports", { params });
+        const data = await cachedGet(client, "/api/public/integrations/accounts/reports", params);
         return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
       } catch (e) { return handleError(e); }
     }

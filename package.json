@@ -35,10 +35,12 @@
     "@modelcontextprotocol/sdk": "^1.10.1",
     "axios": "^1.7.9",
     "express": "^5.2.1",
+    "ioredis": "^5.10.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/ioredis": "^4.28.10",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "axios-mock-adapter": "^2.1.0",
