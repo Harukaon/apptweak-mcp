@@ -30,6 +30,29 @@ export function initDb(databaseUrl?: string): void {
     .catch((err) => console.error("[DB] Init failed:", err.message));
 }
 
+export async function getCachedSnapshot<T>(
+  endpoint: string,
+  params: Record<string, unknown> | undefined,
+  ttlSeconds: number,
+): Promise<T | null> {
+  if (!pool) return null;
+  try {
+    const result = await pool.query<{ data: T }>(
+      `SELECT data FROM apptweak_snapshots
+       WHERE endpoint = $1
+         AND params = $2
+         AND fetched_at > NOW() - INTERVAL '1 second' * $3
+       ORDER BY fetched_at DESC
+       LIMIT 1`,
+      [endpoint, params ?? {}, ttlSeconds],
+    );
+    return result.rows.length > 0 ? result.rows[0].data : null;
+  } catch (err) {
+    console.error("[DB] Cache lookup failed:", (err as Error).message);
+    return null;
+  }
+}
+
 export function persistSnapshot(
   endpoint: string,
   params: Record<string, unknown> | undefined,
@@ -43,4 +66,16 @@ export function persistSnapshot(
     )
     .then(() => console.log(`[DB] SAVED ${endpoint}`))
     .catch((err) => console.error("[DB] Insert failed:", err.message));
+}
+
+export async function getStats(): Promise<{ entries: number }> {
+  if (!pool) return { entries: 0 };
+  try {
+    const result = await pool.query<{ count: string }>(
+      "SELECT COUNT(*)::text AS count FROM apptweak_snapshots",
+    );
+    return { entries: parseInt(result.rows[0].count, 10) };
+  } catch {
+    return { entries: -1 };
+  }
 }

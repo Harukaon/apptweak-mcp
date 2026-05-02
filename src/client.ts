@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
-import { getCache, cacheKey, resolveTtl } from "./cache.js";
-import { persistSnapshot } from "./db.js";
+import { resolveTtl } from "./cache.js";
+import { getCachedSnapshot, persistSnapshot } from "./db.js";
 
 export function createClient(apiKey?: string): AxiosInstance {
   const key = apiKey ?? process.env.APPTWEAK_API_KEY;
@@ -23,24 +23,22 @@ export async function cachedGet<T>(
   params?: Record<string, unknown>,
 ): Promise<T> {
   const ttl = resolveTtl(path);
+
   if (ttl === 0) {
-    console.log(`[CACHE] SKIP ${path} (no-cache endpoint)`);
+    console.log(`[DB] SKIP ${path} (no-cache endpoint)`);
     const { data } = await client.get<T>(path, { params });
     persistSnapshot(path, params, data);
     return data;
   }
 
-  const key = cacheKey(path, params);
-  const cache = getCache();
-  const hit = await cache.get<T>(key);
-  if (hit !== null) {
-    console.log(`[CACHE] HIT  ${path} (ttl=${ttl}s)`);
-    return hit;
+  const cached = await getCachedSnapshot<T>(path, params, ttl);
+  if (cached !== null) {
+    console.log(`[DB] HIT  ${path} (ttl=${ttl}s)`);
+    return cached;
   }
 
-  console.log(`[CACHE] MISS ${path} (ttl=${ttl}s)`);
+  console.log(`[DB] MISS ${path} (ttl=${ttl}s)`);
   const { data } = await client.get<T>(path, { params });
-  await cache.set(key, data, ttl);
   persistSnapshot(path, params, data);
   return data;
 }
