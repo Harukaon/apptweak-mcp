@@ -41,5 +41,6 @@ export function persistSnapshot(
       "INSERT INTO apptweak_snapshots (endpoint, params, data) VALUES ($1, $2, $3)",
       [endpoint, params ?? {}, data],
     )
+    .then(() => console.log(`[DB] SAVED ${endpoint}`))
     .catch((err) => console.error("[DB] Insert failed:", err.message));
 }
