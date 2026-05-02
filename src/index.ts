@@ -9,6 +9,7 @@ import { randomUUID } from "node:crypto";
 import { URL } from "node:url";
 import { createClient } from "./client.js";
 import { initCache } from "./cache.js";
+import { initDb } from "./db.js";
 import { registerTools as registerAppTools } from "./tools/app.js";
 import { registerTools as registerKeywordTools } from "./tools/keywords.js";
 import { registerTools as registerChartTools } from "./tools/charts.js";
@@ -50,6 +51,7 @@ function createServerWithClient(client: ReturnType<typeof createClient>): McpSer
 
 async function main() {
   initCache(process.env.REDIS_URL);
+  initDb(process.env.DATABASE_URL);
   const apiKey = parseApiKey();
 
   if (process.env.HTTP_MODE === "true") {
